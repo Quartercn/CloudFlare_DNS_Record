@@ -53,6 +53,34 @@ check_deps(){
 	fi
 }
 
+# 判断发行版版本
+get_dist_name(){
+    if grep -Eqii "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
+        DISTRO='CentOS'
+        PM='yum'
+    elif grep -Eqi "Red Hat Enterprise Linux Server" /etc/issue || grep -Eq "Red Hat Enterprise Linux Server" /etc/*-release; then
+        DISTRO='RHEL'
+        PM='yum'
+    elif grep -Eqi "Aliyun" /etc/issue || grep -Eq "Aliyun" /etc/*-release; then
+        DISTRO='Aliyun'
+        PM='yum'
+    elif grep -Eqi "Fedora" /etc/issue || grep -Eq "Fedora" /etc/*-release; then
+        DISTRO='Fedora'
+        PM='yum'
+    elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
+        DISTRO='Debian'
+        PM='apt'
+    elif grep -Eqi "Ubuntu" /etc/issue || grep -Eq "Ubuntu" /etc/*-release; then
+        DISTRO='Ubuntu'
+        PM='apt'
+    elif grep -Eqi "Raspbian" /etc/issue || grep -Eq "Raspbian" /etc/*-release; then
+        DISTRO='Raspbian'
+        PM='apt'
+    else
+        DISTRO='unknow'
+    fi
+}
+
 directory(){
 	[[ ! -d ${file} ]] && echo -e "${Error} can not found config directory, please check !" && exit 1
 	cd ${file}
@@ -77,6 +105,7 @@ define(){
 }
 
 choose_service(){
+    echo -e "${Info} system dist: ${DISTRO}"
 	if [[ -z "$1" ]]; then
 		echo -e "${Info} if you want a automatic ddns, firstly you should get record_id"
 		echo -e "${Info} alternatively you can use this script to create a A record and get its id"
@@ -88,8 +117,15 @@ choose_service(){
 			read -p "(input 1~3 to select):" service
 		done
 		[[ "${service}" = "1" ]] && get_record_id
-        sed -i '/CloudFlare_DDNS/d' /var/spool/cron/root
-        echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
+        if [[ $DISTRO == "Ubuntu" ]]; then
+            sed -i '/CloudFlare_DDNS/d' /var/spool/cron/crontabs/root
+            echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/crontabs/root
+        elif [[ $DISTRO == "CentOS" ]]; then
+            sed -i '/CloudFlare_DDNS/d' /var/spool/cron/root
+            echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
+        else
+            echo -e "${Error} not support for ${DISTRO} yet" && exit 1
+        fi
 		[[ "${service}" = "2" ]] && create_record
         [[ "${service}" = "3" ]] && Lightsail_conf
 
@@ -185,6 +221,7 @@ lightsail_change_ip(){
 
 check_root
 check_system
+get_dist_name
 [[ "$1" = "install" ]] && check_deps && exit 0
 directory
 define
