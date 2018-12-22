@@ -120,9 +120,11 @@ choose_service(){
         if [[ $DISTRO == "Ubuntu" ]]; then
             sed -i '/CloudFlare_DDNS/d' /var/spool/cron/crontabs/root
             echo -e '*/3 * * * * bash /home/CloudFlare_DDNS/CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/crontabs/root
+            echo -e "${Info} create cron task for ${DISTRO} success"
         elif [[ $DISTRO == "CentOS" ]]; then
             sed -i '/CloudFlare_DDNS/d' /var/spool/cron/root
             echo -e '*/3 * * * * bash /home/CloudFlare_DDNS/CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
+            echo -e "${Info} create cron task for ${DISTRO} success"
         else
             echo -e "${Error} not support for ${DISTRO} yet" && exit 1
         fi
@@ -177,6 +179,7 @@ get_record_id(){
     fi
     sed -i '/record_id/d' ${ddns_conf}
     echo -e "record_id=${record_id}" >> ${ddns_conf}
+    echo -e "${Info} get record id 【${record_id}】 success"
 }
 
 Lightsail_conf(){
