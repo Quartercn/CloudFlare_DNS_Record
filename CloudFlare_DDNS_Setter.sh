@@ -119,10 +119,10 @@ choose_service(){
 		[[ "${service}" = "1" ]] && get_record_id
         if [[ $DISTRO == "Ubuntu" ]]; then
             sed -i '/CloudFlare_DDNS/d' /var/spool/cron/crontabs/root
-            echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/crontabs/root
+            echo -e '*/3 * * * * bash /home/CloudFlare_DDNS/CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/crontabs/root
         elif [[ $DISTRO == "CentOS" ]]; then
             sed -i '/CloudFlare_DDNS/d' /var/spool/cron/root
-            echo -e '*/3 * * * * bash CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
+            echo -e '*/3 * * * * bash /home/CloudFlare_DDNS/CloudFlare_DDNS_Setter.sh --ddns' >> /var/spool/cron/root
         else
             echo -e "${Error} not support for ${DISTRO} yet" && exit 1
         fi
