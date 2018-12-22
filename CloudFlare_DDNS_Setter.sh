@@ -29,7 +29,9 @@ check_system(){
 # 检查dns ip和本机ip是否不同，如果相同则直接退出脚本
 check_ip_diff(){
     dns_ip=`ping $domain -c 1 -W 1 | head -n 1 | awk '{print $3}' | sed 's/[()]//g'`
+    echo -e "${Info} Local IP: ${local_ip} / DNS IP: ${dns_ip}"
     if [[ $dns_ip == $local_ip ]]; then
+        echo -e "${Info} no need to update record"
         exit 0
     fi
 }
@@ -92,10 +94,14 @@ choose_service(){
         [[ "${service}" = "3" ]] && Lightsail_conf
 
 	elif [[ "$1" == "--ddns" ]]; then
+        echo -e "${Info} start DDNS service"
         if [[ $lightsail_switch == "true" ]]; then
+            echo -e "${Info} start Lightsail service check"
             lightsail_change_ip
         fi
+        echo -e "${Info} start checking if ip changed"
         check_ip_diff
+		echo -e "${Info} now will start automatically ddns record updating service"
 		echo -e "${Info} now will start automatically ddns record updating service"
 		update_record
 
